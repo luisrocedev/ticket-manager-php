@@ -48,11 +48,11 @@ Sistema completo para la gestión de tickets de venta y facturación, diseñado 
 
 ## Tecnologías Utilizadas
 
-- PHP 7.4+
-- MySQL 5.7+
-- Bootstrap 5
-- JavaScript (ES6+)
-- HTML5/CSS3
+- PHP
+- MySQL
+- Bootstrap
+- JavaScript
+- HTML/CSS
 
 ## Requisitos del Sistema
 
