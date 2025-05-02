@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: localhost:8889
--- Tiempo de generación: 26-04-2025 a las 14:05:49
+-- Tiempo de generación: 02-05-2025 a las 12:27:41
 -- Versión del servidor: 5.7.44
 -- Versión de PHP: 8.2.20
 
@@ -43,8 +43,7 @@ CREATE TABLE `clientes` (
 --
 
 INSERT INTO `clientes` (`id`, `nombre`, `apellidos`, `dni_cif`, `direccion`, `telefono`, `email`, `created_at`) VALUES
-(1, 'Juan', 'Pérez García', '12345678A', 'Av. Principal 1', '611234567', 'juan@email.com', '2025-04-26 13:53:56'),
-(2, 'María', 'López Sánchez', '87654321B', 'Calle Segunda 2', '622345678', 'maria@email.com', '2025-04-26 13:53:56');
+(6, 'María', 'López García', '87654321B', 'C/ Ejemplo 45', '611223344', 'maria.lopez@example.com', '2025-05-02 12:21:57');
 
 -- --------------------------------------------------------
 
@@ -67,8 +66,7 @@ CREATE TABLE `empresas` (
 --
 
 INSERT INTO `empresas` (`id`, `nombre`, `cif`, `direccion`, `telefono`, `email`, `logo`) VALUES
-(1, 'Mi Empresa', 'B12345678', 'Calle Principal 123', '123456789', 'info@miempresa.com', NULL),
-(2, 'Mi Empresa S.L.', 'B12345678', 'Calle Principal 123', '912345678', 'info@miempresa.com', NULL);
+(4, 'Empresa Demo S.L.', 'B99999999', 'Calle Falsa 123', '600112233', 'demo@empresa.com', NULL);
 
 -- --------------------------------------------------------
 
@@ -108,11 +106,8 @@ CREATE TABLE `productos` (
 --
 
 INSERT INTO `productos` (`id`, `codigo`, `nombre`, `descripcion`, `precio`, `iva`, `stock`, `created_at`, `updated_at`) VALUES
-(1, 'P001', 'Laptop HP', 'Laptop HP 15 pulgadas', 599.99, 21.00, 10, '2025-04-26 13:53:56', '2025-04-26 13:53:56'),
-(2, 'P002', 'Monitor Dell', 'Monitor Dell 24 pulgadas', 199.99, 21.00, 15, '2025-04-26 13:53:56', '2025-04-26 13:53:56'),
-(3, 'P003', 'Teclado Mecánico', 'Teclado Gaming RGB', 79.99, 21.00, 20, '2025-04-26 13:53:56', '2025-04-26 13:53:56'),
-(4, 'P004', 'Ratón Gaming', 'Ratón Gaming 6400 DPI', 45.99, 21.00, 25, '2025-04-26 13:53:56', '2025-04-26 13:53:56'),
-(5, 'P005', 'Impresora Canon', 'Impresora Multifunción', 159.99, 21.00, 8, '2025-04-26 13:53:56', '2025-04-26 13:53:56');
+(9, 'X001', 'Teclado Mecánico', 'Teclado gaming retroiluminado', 75.00, 21.00, 50, '2025-05-02 12:21:57', '2025-05-02 12:21:57'),
+(10, 'X002', 'Monitor 24\"', 'Monitor Full HD 144Hz', 180.00, 21.00, 20, '2025-05-02 12:21:57', '2025-05-02 12:21:57');
 
 -- --------------------------------------------------------
 
@@ -211,13 +206,13 @@ ALTER TABLE `ticket_items`
 -- AUTO_INCREMENT de la tabla `clientes`
 --
 ALTER TABLE `clientes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `empresas`
 --
 ALTER TABLE `empresas`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT de la tabla `facturas`
@@ -229,13 +224,13 @@ ALTER TABLE `facturas`
 -- AUTO_INCREMENT de la tabla `productos`
 --
 ALTER TABLE `productos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT de la tabla `tickets`
 --
 ALTER TABLE `tickets`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT de la tabla `ticket_items`

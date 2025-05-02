@@ -151,8 +151,8 @@
     // Función para cargar los datos
     async function loadData(page = 1) {
         try {
-            console.log('Intentando cargar datos desde:', `/GitHub/ticketscompra/api/${entityEndpoint}`);
-            const response = await fetch(`/GitHub/ticketscompra/api/${entityEndpoint}?page=${page}&limit=${itemsPerPage}`);
+            console.log('Intentando cargar datos desde:', `/GitHub/ticketscompra/index.php/api/${entityEndpoint}`);
+            const response = await fetch(`/GitHub/ticketscompra/index.php/api/${entityEndpoint}?page=${page}&limit=${itemsPerPage}`);
             console.log('Respuesta recibida:', response);
 
             if (!response.ok) {
@@ -234,7 +234,7 @@
     // Función para editar una entidad
     async function editEntity(id) {
         try {
-            const response = await fetch(`/GitHub/ticketscompra/api/${entityEndpoint}/${id}`);
+            const response = await fetch(`/GitHub/ticketscompra/index.php/api/${entityEndpoint}/${id}`);
             const data = await response.json();
 
             if (data.success) {
@@ -271,7 +271,7 @@
         const data = Object.fromEntries(formData.entries());
 
         try {
-            const url = `/GitHub/ticketscompra/api/${entityEndpoint}${currentId ? `/${currentId}` : ''}`;
+            const url = `/GitHub/ticketscompra/index.php/api/${entityEndpoint}${currentId ? `/${currentId}` : ''}`;
             const method = currentId ? 'PUT' : 'POST';
 
             const response = await fetch(url, {
@@ -282,7 +282,14 @@
                 body: JSON.stringify(data)
             });
 
-            const result = await response.json();
+            let result;
+            const text = await response.text();
+            try {
+                result = JSON.parse(text);
+            } catch (e) {
+                showError(`Respuesta inválida del servidor: ${text}`);
+                return;
+            }
 
             if (result.success) {
                 bootstrap.Modal.getInstance(document.getElementById('entityModal')).hide();
@@ -306,7 +313,7 @@
     // Función para confirmar la eliminación
     async function confirmDelete() {
         try {
-            const response = await fetch(`/GitHub/ticketscompra/api/${entityEndpoint}/${currentId}`, {
+            const response = await fetch(`/GitHub/ticketscompra/index.php/api/${entityEndpoint}/${currentId}`, {
                 method: 'DELETE'
             });
 
@@ -334,7 +341,8 @@
         <strong>Error:</strong> ${message}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     `;
-        document.querySelector('.container-fluid').insertBefore(errorDiv, document.querySelector('.card'));
+        const container = document.querySelector('.container-fluid');
+        container.prepend(errorDiv);
     }
 
     // Función para mostrar mensajes de éxito

@@ -21,15 +21,21 @@ class TicketController extends BaseCrudController
     public function nuevo()
     {
         try {
-            $empresa = $this->empresaRepository->buscarPorId(1);
-            if (!$empresa) {
-                throw new Exception("No se encontró la empresa configurada");
+            // Obtener listado de empresas disponibles
+            $empresas = $this->empresaRepository->listarTodas();
+            if (empty($empresas)) {
+                throw new Exception("No hay empresas configuradas");
             }
-
+            // Empresa por defecto (la primera)
+            $empresa = $empresas[0];
             $ticket = $this->ticketService->crearTicket($empresa);
+            // Obtener clientes para selección
+            $clientes = (new ClienteRepository())->listarTodos();
             return [
                 'ticket' => $ticket,
-                'empresa' => $empresa
+                'empresa' => $empresa,
+                'empresas' => $empresas,
+                'clientes' => $clientes
             ];
         } catch (Exception $e) {
             throw new Exception("Error al crear nuevo ticket: " . $e->getMessage());
@@ -146,9 +152,20 @@ class TicketController extends BaseCrudController
         try {
             $data = json_decode(file_get_contents('php://input'), true);
             $ticket = $this->ticketService->buscarPorNumero($data['ticketId']);
-
+            // Si el ticket no está en BD (nuevo), crearlo en memoria para agregar items
             if (!$ticket) {
-                throw new Exception("Ticket no encontrado");
+                $empresa = $this->empresaRepository->buscarPorId(1);
+                if (!$empresa) {
+                    throw new Exception("Empresa no configurada");
+                }
+                $ticket = $this->ticketService->crearTicket($empresa);
+                // Asegurar que el número coincide con el cliente
+                // vigilar que ticket->numeroTicket se genere igual, de lo contrario usar el recibido
+                // Podemos forzar el número al recibido para mantener consistencia
+                $ref = new ReflectionClass('Ticket');
+                $prop = $ref->getProperty('numeroTicket');
+                $prop->setAccessible(true);
+                $prop->setValue($ticket, $data['ticketId']);
             }
 
             $producto = (new ProductoRepository())->buscarPorId($data['productoId']);
@@ -174,15 +191,38 @@ class TicketController extends BaseCrudController
     {
         try {
             $data = json_decode(file_get_contents('php://input'), true);
+            // Buscar ticket existente
             $ticket = $this->ticketService->buscarPorNumero($data['ticketId']);
-
             if (!$ticket) {
-                throw new Exception("Ticket no encontrado");
+                // Crear en memoria usando empresa seleccionada
+                $empresa = $this->empresaRepository->buscarPorId($data['empresa_id']);
+                if (!$empresa) {
+                    throw new Exception("Empresa no configurada");
+                }
+                $ticket = $this->ticketService->crearTicket($empresa);
+                // Ajustar número para mantener consistencia
+                $ref = new \ReflectionClass('Ticket');
+                $prop = $ref->getProperty('numeroTicket');
+                $prop->setAccessible(true);
+                $prop->setValue($ticket, $data['ticketId']);
             }
-
-            $ticket = $this->ticketService->finalizarTicket($ticket, $data['metodoPago'], $data['dniCliente']);
+            // Agregar items enviados
+            if (!empty($data['items']) && is_array($data['items'])) {
+                foreach ($data['items'] as $itemData) {
+                    $producto = (new ProductoRepository())->buscarPorId($itemData['id']);
+                    if ($producto) {
+                        $this->ticketService->agregarProducto($ticket, $producto, $itemData['cantidad']);
+                    }
+                }
+            }
+            // Finalizar ticket usando empresa y cliente seleccionados
+            $ticket = $this->ticketService->finalizarTicket(
+                $ticket,
+                $data['metodoPago'],
+                $data['cliente_id'] ?? null,
+                $data['dniCliente'] ?? null
+            );
             $impresion = $this->ticketService->generarImpresion($ticket);
-
             return $this->jsonResponse([
                 'success' => true,
                 'ticket' => $ticket->toArray(),

@@ -98,6 +98,25 @@ if (!isset($ticket)) {
                     </div>
 
                     <div class="mb-3">
+                        <label for="empresaSelect" class="form-label">Empresa:</label>
+                        <select class="form-select mb-3" id="empresaSelect">
+                            <?php foreach ($empresas as $emp): ?>
+                                <option value="<?= $emp->getId() ?>" <?= $emp->getId() === $empresa->getId() ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($emp->getNombre(), ENT_QUOTES, 'UTF-8') ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <div class="mb-3">
+                            <label for="clienteSelect" class="form-label">Cliente:</label>
+                            <select class="form-select mb-3" id="clienteSelect">
+                                <option value="">-- Ninguno --</option>
+                                <?php foreach ($clientes as $cli): ?>
+                                    <option value="<?= $cli->getId() ?>">
+                                        <?= htmlspecialchars($cli->getNombre() . ' ' . $cli->getApellidos(), ENT_QUOTES, 'UTF-8') ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
                         <label for="metodoPago" class="form-label">Método de Pago:</label>
                         <select class="form-select" id="metodoPago">
                             <option value="efectivo">Efectivo</option>
@@ -160,17 +179,36 @@ if (!isset($ticket)) {
     function buscarProducto() {
         const busqueda = document.getElementById('buscarProducto').value;
         fetch(`/GitHub/ticketscompra/api/productos/buscar?q=${encodeURIComponent(busqueda)}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la respuesta: ${response.status} ${response.statusText}`);
+                }
+                return response.text().then(text => {
+                    if (!text) return {};
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Error al analizar JSON:', text);
+                        throw new Error('La respuesta no es un JSON válido');
+                    }
+                });
+            })
             .then(data => {
+                if (!data || !Array.isArray(data)) {
+                    console.warn('La respuesta no es un array:', data);
+                    return;
+                }
                 const tbody = document.querySelector('#tablaProductos tbody');
                 tbody.innerHTML = '';
                 data.forEach(producto => {
+                    // Asegurar que el precio sea un número antes de usar toFixed()
+                    const precio = parseFloat(producto.precio) || 0;
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                    <td>${producto.codigo}</td>
-                    <td>${producto.nombre}</td>
-                    <td>${producto.precio.toFixed(2)} €</td>
-                    <td>${producto.stock}</td>
+                    <td>${producto.codigo || ''}</td>
+                    <td>${producto.nombre || ''}</td>
+                    <td>${precio.toFixed(2)} €</td>
+                    <td>${producto.stock || 0}</td>
                     <td>
                         <button class="btn btn-sm btn-primary" onclick="seleccionarProducto(${producto.id})">
                             <i class="fas fa-plus"></i>
@@ -179,6 +217,10 @@ if (!isset($ticket)) {
                 `;
                     tbody.appendChild(tr);
                 });
+            })
+            .catch(error => {
+                console.error('Error en buscarProducto:', error);
+                alert('Error al buscar productos: ' + error.message);
             });
     }
 
@@ -187,43 +229,64 @@ if (!isset($ticket)) {
         new bootstrap.Modal(document.getElementById('modalCantidad')).show();
     }
 
-    function agregarProductoATicket() {
-        const productoId = document.getElementById('productoId').value;
-        const cantidad = document.getElementById('cantidad').value;
-
-        fetch('/GitHub/ticketscompra/api/tickets/agregar-producto', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ticketId: document.getElementById('numeroTicket').textContent,
-                    productoId: productoId,
-                    cantidad: cantidad
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    actualizarTablaTicket(data.ticket);
-                    bootstrap.Modal.getInstance(document.getElementById('modalCantidad')).hide();
-                } else {
-                    alert(data.error);
-                }
+    async function agregarProductoATicket() {
+        const productoId = parseInt(document.getElementById('productoId').value);
+        const cantidad = parseInt(document.getElementById('cantidad').value);
+        try {
+            // Obtener detalles del producto
+            const resp = await fetch(`/GitHub/ticketscompra/api/productos/${productoId}`);
+            const result = await resp.json();
+            if (!result.success) {
+                throw new Error(result.error || 'No se pudo obtener el producto');
+            }
+            const producto = result.data;
+            // Añadir al array de items
+            ticketItems.push({
+                id: producto.id,
+                nombre: producto.nombre,
+                precio: parseFloat(producto.precio),
+                iva: parseFloat(producto.iva),
+                cantidad: cantidad
             });
+            // Actualizar la tabla y cerrar modal
+            actualizarTablaTicket({
+                items: ticketItems
+            });
+            bootstrap.Modal.getInstance(document.getElementById('modalCantidad')).hide();
+        } catch (error) {
+            console.error('Error al agregar el producto:', error);
+            alert('Error al agregar el producto: ' + error.message);
+        }
     }
 
     function buscarCliente() {
         const dni = document.getElementById('dniCliente').value;
         if (dni) {
             fetch(`/GitHub/ticketscompra/api/clientes/buscar/${dni}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error en la respuesta: ${response.status} ${response.statusText}`);
+                    }
+                    return response.text().then(text => {
+                        if (!text) return {};
+                        try {
+                            return JSON.parse(text);
+                        } catch (e) {
+                            console.error('Error al analizar JSON:', text);
+                            throw new Error('La respuesta no es un JSON válido');
+                        }
+                    });
+                })
                 .then(data => {
-                    if (data.success) {
+                    if (data && data.success) {
                         alert(`Cliente encontrado: ${data.cliente.nombre} ${data.cliente.apellidos}`);
                     } else {
                         alert('Cliente no encontrado');
                     }
+                })
+                .catch(error => {
+                    console.error('Error en buscarCliente:', error);
+                    alert('Error al buscar cliente: ' + error.message);
                 });
         }
     }
@@ -239,20 +302,40 @@ if (!isset($ticket)) {
                 },
                 body: JSON.stringify({
                     ticketId: document.getElementById('numeroTicket').textContent,
+                    empresa_id: document.getElementById('empresaSelect').value,
+                    cliente_id: document.getElementById('clienteSelect').value || null,
+                    items: ticketItems,
                     metodoPago: metodoPago,
                     dniCliente: dniCliente || null
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error en la respuesta: ${response.status} ${response.statusText}`);
+                }
+                return response.text().then(text => {
+                    if (!text) return {};
+                    try {
+                        return JSON.parse(text);
+                    } catch (e) {
+                        console.error('Error al analizar JSON:', text);
+                        throw new Error('La respuesta no es un JSON válido');
+                    }
+                });
+            })
             .then(data => {
-                if (data.success) {
+                if (data && data.success) {
                     // Imprimir ticket
                     imprimirTicket(data.impresion);
                     // Redireccionar a la lista de tickets
                     window.location.href = '/GitHub/ticketscompra/tickets/lista';
                 } else {
-                    alert(data.error);
+                    alert(data.error || 'Error al finalizar el ticket');
                 }
+            })
+            .catch(error => {
+                console.error('Error en finalizarTicket:', error);
+                alert('Error al finalizar el ticket: ' + error.message);
             });
     }
 
@@ -284,4 +367,68 @@ if (!isset($ticket)) {
             timeoutId = setTimeout(buscarProducto, 300);
         });
     });
+
+    // Función para actualizar la tabla del ticket con los productos agregados
+    function actualizarTablaTicket(ticket) {
+        if (!ticket || !ticket.items || !Array.isArray(ticket.items)) {
+            console.error("Datos de ticket inválidos:", ticket);
+            return;
+        }
+
+        const tbody = document.querySelector('#tablaTicket tbody');
+        tbody.innerHTML = '';
+
+        let subtotalGeneral = 0;
+        let ivaTotalGeneral = 0;
+
+        ticket.items.forEach(item => {
+            // Asegurar que todos los valores numéricos se traten como números
+            const cantidad = parseFloat(item.cantidad);
+            const precioUnitario = parseFloat(item.precio);
+            const ivaPorcentaje = parseFloat(item.iva);
+
+            // Calcular los valores
+            const subtotal = cantidad * precioUnitario;
+            const ivaValor = (subtotal * ivaPorcentaje) / 100;
+            const total = subtotal + ivaValor;
+
+            // Acumular totales
+            subtotalGeneral += subtotal;
+            ivaTotalGeneral += ivaValor;
+
+            // Crear la fila
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${item.nombre}</td>
+                <td>${cantidad}</td>
+                <td>${precioUnitario.toFixed(2)} €</td>
+                <td>${ivaPorcentaje}%</td>
+                <td>${subtotal.toFixed(2)} €</td>
+                <td>${total.toFixed(2)} €</td>
+                <td>
+                    <button class="btn btn-sm btn-danger" onclick="eliminarProducto(${item.id})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        // Actualizar el resumen
+        const totalGeneral = subtotalGeneral + ivaTotalGeneral;
+        document.getElementById('subtotal').textContent = subtotalGeneral.toFixed(2) + ' €';
+        document.getElementById('ivaTotal').textContent = ivaTotalGeneral.toFixed(2) + ' €';
+        document.getElementById('total').textContent = totalGeneral.toFixed(2) + ' €';
+    }
+
+    // Función para eliminar un producto del ticket
+    function eliminarProducto(itemId) {
+        if (confirm('¿Está seguro que desea eliminar este producto del ticket?')) {
+            // Eliminar del array y actualizar la tabla
+            ticketItems = ticketItems.filter(item => item.id !== itemId);
+            actualizarTablaTicket({
+                items: ticketItems
+            });
+        }
+    }
 </script>

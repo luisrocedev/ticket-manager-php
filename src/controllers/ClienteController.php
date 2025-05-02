@@ -97,4 +97,10 @@ class ClienteController extends BaseCrudController
             ]);
         }
     }
+
+    // Añadir método público para buscar por criterios
+    public function buscar(array $params)
+    {
+        return parent::buscar($params);
+    }
 }

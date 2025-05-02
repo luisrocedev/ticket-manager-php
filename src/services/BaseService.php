@@ -33,7 +33,8 @@ abstract class BaseService
             throw new Exception("Entidad no encontrada");
         }
         $this->updateEntity($entity, $data);
-        return $this->repository->actualizar($entity);
+        $this->repository->actualizar($entity);
+        return $entity;
     }
 
     public function eliminar($id)

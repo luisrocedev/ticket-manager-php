@@ -33,11 +33,31 @@ class FacturaController extends BaseCrudController
 
     protected function prepareDataForResponse($factura): array
     {
+        $ticket = $factura->getTicket();
         return [
             'id' => $factura->getId(),
             'numero_factura' => $factura->getNumeroFactura(),
             'fecha_emision' => $factura->getFechaEmision()->format('Y-m-d'),
-            'ticket' => $factura->getTicket()->toArray(),
+            'ticket' => [
+                'id' => $ticket->getId(),
+                'numero_ticket' => $ticket->getNumeroTicket(),
+                'cliente' => $ticket->getCliente() ? [
+                    'nombre' => $ticket->getCliente()->getNombre(),
+                    'apellidos' => $ticket->getCliente()->getApellidos()
+                ] : null,
+                'total' => $ticket->getTotal()
+            ],
+            'items' => array_map(
+                function ($item) {
+                    return [
+                        'producto' => $item->getProducto()->getNombre(),
+                        'cantidad' => $item->getCantidad(),
+                        'precio' => $item->getProducto()->getPrecio(),
+                        'subtotal' => $item->getSubtotal()
+                    ];
+                },
+                $ticket->getItems()
+            ),
             'estado' => $factura->getEstado()
         ];
     }
@@ -56,9 +76,11 @@ class FacturaController extends BaseCrudController
                 'estado' => $estado
             ]);
 
+            $data = array_map([$this, 'prepareDataForResponse'], $facturas);
             return $this->jsonResponse([
                 'success' => true,
-                'data' => array_map([$this, 'prepareDataForResponse'], $facturas)
+                'data' => $data,
+                'total' => count($data)
             ]);
         } catch (Exception $e) {
             return $this->jsonResponse([

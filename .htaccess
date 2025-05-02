@@ -1,7 +1,11 @@
-RewriteEngine On
-RewriteBase /GitHub/ticketscompra
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    AcceptPathInfo On
+    RewriteBase /GitHub/ticketscompra/
 
-# Si el archivo o directorio no existe, redirigir a index.php
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+    # Si el recurso existe, servirlo directamente
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    # Enviar todo a index.php con PATH_INFO
+    RewriteRule ^(.*)$ index.php/$1 [QSA,L]
+</IfModule>

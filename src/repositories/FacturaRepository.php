@@ -19,12 +19,15 @@ class FacturaRepository
 
             $stmt = $this->db->prepare($sql);
 
-            return $stmt->execute([
+            $stmt->execute([
                 ':numero_factura' => $factura->getNumeroFactura(),
                 ':ticket_id' => $factura->getTicket()->getId(),
                 ':fecha_emision' => $factura->getFechaEmision()->format('Y-m-d H:i:s'),
                 ':estado' => $factura->getEstado()
             ]);
+            // Retornar la factura creada
+            $lastId = $this->db->lastInsertId();
+            return $this->buscarPorId($lastId);
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
                 throw new Exception("Ya existe una factura para este ticket");

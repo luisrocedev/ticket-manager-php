@@ -1,7 +1,9 @@
 <?php
-// Configuración inicial
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once __DIR__ . '/vendor/autoload.php';
+// Configuración inicial: desactivar display de errores en producción
+error_reporting(0);
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
 
 // Configurar cabeceras CORS
 header('Access-Control-Allow-Origin: *');
@@ -65,6 +67,32 @@ $base_path = '/GitHub/ticketscompra';
 $path = str_replace($base_path, '', $request_uri);
 $path = strtok($path, '?');
 
+// Ajustar path para eliminar '/index.php' si se incluye
+$path = str_replace('/index.php', '', $path);
+
+// Si es llamada al API, desactivar display_errors para no romper JSON
+if (strpos($path, '/api/') === 0) {
+    ini_set('display_errors', '0');
+    error_reporting(0);
+}
+
+// Si se solicita previsualización (fragmento) de factura, devolver solo la vista parcial
+if (isset($_GET['preview']) && $_GET['preview'] === 'factura' && isset($_GET['id'])) {
+    header('Content-Type: text/html; charset=UTF-8');
+    $controller = new FacturaController();
+    $json = $controller->show($_GET['id']);
+    $resp = json_decode($json, true);
+    if (empty($resp['success'])) {
+        http_response_code(404);
+        echo 'Factura no encontrada';
+        exit;
+    }
+    $invoice = $resp['data'];
+    // Incluir vista parcial sin layout
+    include __DIR__ . '/src/views/facturas/show.php';
+    exit;
+}
+
 // Enrutamiento básico
 try {
     switch ($path) {
@@ -104,6 +132,13 @@ try {
                 } elseif (preg_match('/^\/api\/tickets\/disponibles$/', $path)) {
                     echo $controller->getTicketsDisponibles();
                 }
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                if (preg_match('/^\/api\/tickets\/agregar-producto$/', $path)) {
+                    echo $controller->agregarProducto();
+                } elseif (preg_match('/^\/api\/tickets\/finalizar$/', $path)) {
+                    echo $controller->finalizarTicket();
+                }
+                // La eliminación de productos se maneja en memoria en el front-end
             }
             break;
 
@@ -122,6 +157,31 @@ try {
                 'entityName' => 'Cliente',
                 'entityEndpoint' => 'clientes',
                 'titulo' => 'Gestión de Clientes'
+            ]);
+            break;
+
+        case '/empresas':
+            $controller = new EmpresaController();
+            renderView('empresas/index', [
+                'entityName' => 'Empresa',
+                'entityEndpoint' => 'empresas',
+                'titulo' => 'Gestión de Empresas'
+            ]);
+            break;
+
+        case (preg_match('/^\/facturas\/(\d+)$/', $path, $matches) ? true : false):
+            $controller = new FacturaController();
+            // Obtener JSON de la factura y decodificar
+            $json = $controller->show($matches[1]);
+            $resp = json_decode($json, true);
+            if (empty($resp['success'])) {
+                throw new Exception($resp['error'] ?? 'Factura no encontrada');
+            }
+            $invoice = $resp['data'];
+            // Renderizar vista de detalle
+            renderView('facturas/show', [
+                'invoice' => $invoice,
+                'titulo' => 'Factura ' . $invoice['numero_factura']
             ]);
             break;
 
@@ -157,6 +217,32 @@ try {
                 }
             } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
                 if (preg_match('/^\/api\/clientes\/(\d+)$/', $path, $matches)) {
+                    echo $controller->destroy($matches[1]);
+                }
+            }
+            break;
+
+        // API endpoints para empresas
+        case (preg_match('/^\/api\/empresas/', $path) ? true : false):
+            header('Content-Type: application/json');
+            $controller = new EmpresaController();
+
+            if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+                if (preg_match('/^\/api\/empresas\/(\d+)$/', $path, $matches)) {
+                    echo $controller->show($matches[1]);
+                } else {
+                    echo $controller->index();
+                }
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
+                $data = json_decode(file_get_contents('php://input'), true);
+                echo $controller->store($data);
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+                if (preg_match('/^\/api\/empresas\/(\d+)$/', $path, $matches)) {
+                    $data = json_decode(file_get_contents('php://input'), true);
+                    echo $controller->update($matches[1], $data);
+                }
+            } elseif ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+                if (preg_match('/^\/api\/empresas\/(\d+)$/', $path, $matches)) {
                     echo $controller->destroy($matches[1]);
                 }
             }

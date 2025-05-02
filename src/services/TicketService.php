@@ -81,9 +81,16 @@ class TicketService extends BaseService
         return $ticket;
     }
 
-    public function finalizarTicket($ticket, $metodoPago, $dniCliente = null)
+    public function finalizarTicket($ticket, $metodoPago, $clienteId = null, $dniCliente = null)
     {
-        if ($dniCliente) {
+        // Asignar cliente por ID, o bien por DNI/CIF si se proporciona
+        if ($clienteId) {
+            $cliente = $this->clienteRepository->buscarPorId($clienteId);
+            if (!$cliente) {
+                throw new Exception("Cliente no encontrado");
+            }
+            $ticket->setCliente($cliente);
+        } elseif ($dniCliente) {
             $cliente = $this->clienteRepository->buscarPorDniCif($dniCliente);
             if (!$cliente) {
                 throw new Exception("Cliente no encontrado");

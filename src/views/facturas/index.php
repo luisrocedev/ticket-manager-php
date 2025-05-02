@@ -13,7 +13,7 @@ $columns = [
     'estado' => ['label' => 'Estado', 'sortable' => true, 'type' => 'text']
 ];
 
-// Definir los campos del formulario
+// Definir los campos del formulario (solo ticket)
 $formFields = [
     [
         'name' => 'ticket_id',
@@ -22,24 +22,6 @@ $formFields = [
         'required' => true,
         'options' => [], // Se llenará dinámicamente con los tickets disponibles
         'help' => 'Seleccione el ticket para generar la factura'
-    ],
-    [
-        'name' => 'fecha_emision',
-        'label' => 'Fecha de Emisión',
-        'type' => 'date',
-        'required' => true,
-        'value' => date('Y-m-d')
-    ],
-    [
-        'name' => 'estado',
-        'label' => 'Estado',
-        'type' => 'select',
-        'required' => true,
-        'options' => [
-            ['value' => 'emitida', 'label' => 'Emitida'],
-            ['value' => 'pagada', 'label' => 'Pagada'],
-            ['value' => 'anulada', 'label' => 'Anulada']
-        ]
     ]
 ];
 
@@ -57,10 +39,12 @@ include(__DIR__ . '/../shared/crud.php');
             if (data.success) {
                 const ticketSelect = document.getElementById('ticket_id');
                 if (ticketSelect) {
+                    // Limpiar opciones existentes
+                    ticketSelect.innerHTML = '<option value="" disabled selected>Seleccione un ticket</option>';
                     data.data.forEach(ticket => {
                         const option = document.createElement('option');
                         option.value = ticket.id;
-                        option.textContent = `${ticket.numero_ticket} - ${ticket.cliente ? ticket.cliente.nombre : 'Sin cliente'} - ${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(ticket.total)}`;
+                        option.textContent = `${ticket.numeroTicket} - ${ticket.cliente ? ticket.cliente.nombre : 'Sin cliente'} - ${new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(ticket.total)}`;
                         ticketSelect.appendChild(option);
                     });
                 }
@@ -100,10 +84,82 @@ include(__DIR__ . '/../shared/crud.php');
     }
 
     function verFactura(id) {
-        window.location.href = `/GitHub/ticketscompra/facturas/${id}`;
+        // Obtener datos de la factura y renderizar en el modal
+        fetch(`/GitHub/ticketscompra/api/facturas/${id}`)
+            .then(res => res.json())
+            .then(data => {
+                if (!data.success) {
+                    showError(data.error || 'No se pudo cargar la factura');
+                    return;
+                }
+                const inv = data.data;
+                let html = `
+                    <h5>Factura ${inv.numero_factura}</h5>
+                    <p><strong>Fecha:</strong> ${new Date(inv.fecha_emision).toLocaleDateString('es-ES')}</p>
+                    <p><strong>Ticket:</strong> ${inv.ticket.numero_ticket}</p>
+                    ${inv.ticket.cliente ? `<p><strong>Cliente:</strong> ${inv.ticket.cliente.nombre} ${inv.ticket.cliente.apellidos}</p>` : ''}
+                    <table class="table">
+                        <thead><tr><th>Producto</th><th>Cantidad</th><th>Precio</th><th>Subtotal</th></tr></thead>
+                        <tbody>
+                        ${inv.items.map(item => `
+                            <tr>
+                                <td>${item.producto}</td>
+                                <td>${item.cantidad}</td>
+                                <td>${new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(item.precio)}</td>
+                                <td>${new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(item.subtotal)}</td>
+                            </tr>
+                        `).join('')}
+                        </tbody>
+                    </table>
+                    <div class="text-end">
+                        <strong>Total:</strong> ${new Intl.NumberFormat('es-ES',{style:'currency',currency:'EUR'}).format(inv.ticket.total)}
+                    </div>
+                `;
+                document.getElementById('previewBody').innerHTML = html;
+                new bootstrap.Modal(document.getElementById('previewModal')).show();
+            })
+            .catch(err => showError('Error al cargar la factura: ' + err.message));
     }
 
     function descargarPDF(id) {
-        window.location.href = `/GitHub/ticketscompra/facturas/${id}/pdf`;
+        window.location.href = `/GitHub/ticketscompra/index.php/facturas/${id}/pdf`;
+    }
+
+    // Sobreescribir la función de guardar para generar factura
+    async function saveEntity() {
+        const ticketId = document.getElementById('ticket_id').value;
+        try {
+            const response = await fetch(`/GitHub/ticketscompra/api/facturas/generar/${ticketId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const result = await response.json();
+            if (result.success) {
+                bootstrap.Modal.getInstance(document.getElementById('entityModal')).hide();
+                showSuccess(result.message);
+                loadData(currentPage);
+            } else {
+                showError(result.error || 'Error al generar la factura');
+            }
+        } catch (error) {
+            console.error('Error al generar factura:', error);
+            showError(error.message);
+        }
     }
 </script>
+
+<!-- Modal para vista previa de factura -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vista previa de factura</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0" id="previewBody">
+            </div>
+        </div>
+    </div>
+</div>

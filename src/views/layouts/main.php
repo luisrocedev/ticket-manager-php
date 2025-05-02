@@ -61,6 +61,11 @@
                         </a>
                     </li>
                     <li class="nav-item">
+                        <a class="nav-link" href="/GitHub/ticketscompra/empresas">
+                            <i class="fas fa-building"></i> Empresas
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="/GitHub/ticketscompra/facturas">
                             <i class="fas fa-file-invoice"></i> Facturas
                         </a>

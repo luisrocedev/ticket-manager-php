@@ -1,5 +1,7 @@
 <?php
 
+use Dompdf\Dompdf;
+
 class FacturaService extends BaseService
 {
     private $ticketService;
@@ -49,17 +51,27 @@ class FacturaService extends BaseService
         }
 
         $factura = new Factura($ticket);
-        if (!$this->repository->crear($factura)) {
+        $createdFactura = $this->repository->crear($factura);
+        if (!$createdFactura) {
             throw new Exception("Error al crear la factura");
         }
 
-        return $this->repository->buscarPorId($this->repository->lastInsertId());
+        return $createdFactura;
     }
 
     public function generarPDF(Factura $factura)
     {
-        // Aquí iría la lógica para generar el PDF
-        // Por ahora retornamos un mensaje simple
-        return "Contenido del PDF para la factura " . $factura->getNumeroFactura();
+        // Generar PDF usando Dompdf
+        $data = $factura->toArray();
+        // Renderizar HTML de la factura
+        ob_start();
+        include __DIR__ . '/../views/facturas/pdf.php';
+        $html = ob_get_clean();
+
+        $dompdf = new Dompdf();
+        $dompdf->loadHtml($html);
+        $dompdf->setPaper('A4', 'portrait');
+        $dompdf->render();
+        return $dompdf->output();
     }
 }
