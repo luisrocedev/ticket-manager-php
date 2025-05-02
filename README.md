@@ -1,167 +1,79 @@
-# Sistema de Gestión de Tickets y Facturación
+# ticketscompra
+
+Sistema de gestión y generación de tickets de compra
 
 ## Descripción
 
-Sistema completo para la gestión de tickets de venta y facturación, diseñado específicamente para su futura integración con el PMS Daniya Denia. Esta aplicación permite gestionar todo el proceso de ventas, desde la creación de tickets hasta la generación de facturas, con un enfoque en la usabilidad y la eficiencia.
+ticketscompra es una aplicación desarrollada en PHP que permite gestionar productos, usuarios y generar tickets de compra, así como facturas en PDF. El sistema está pensado para comercios o negocios que necesitan llevar un control de ventas, productos y clientes de forma sencilla y eficiente.
 
-## Características Principales
+## Funcionalidades principales
 
-### 1. Gestión de Tickets
+- Gestión de productos: alta, baja, modificación y control de stock.
+- Gestión de tickets de compra: creación, listado, impresión y exportación a PDF.
+- Gestión de clientes y usuarios.
+- Generación de facturas a partir de tickets.
+- Informes de ventas y estadísticas básicas.
+- Validación de datos y control de sesiones.
 
-- Creación de tickets en tiempo real
-- Múltiples métodos de pago
-- Asociación con clientes
-- Control de productos y cantidades
-- Impresión de tickets
-- Vista detallada de tickets
-- Historial completo de ventas
+## Tecnologías utilizadas
 
-### 2. Gestión de Productos
+- PHP (backend)
+- MySQL o MariaDB (base de datos)
+- HTML, CSS, JavaScript (frontend)
+- Composer (gestión de dependencias)
+- dompdf (generación de PDF)
 
-- Inventario en tiempo real
-- Control de precios
-- Gestión de IVA por producto
-- Códigos de producto únicos
-- Control de stock
+## Estructura del proyecto
 
-### 3. Gestión de Clientes
-
-- Base de datos de clientes
-- Búsqueda por DNI/CIF
-- Historial de compras por cliente
-- Datos fiscales para facturación
-
-### 4. Sistema de Facturación
-
-- Generación automática de facturas
-- Numeración secuencial
-- Exportación a PDF
-- Gestión del estado de facturas
-- Búsqueda y filtrado de facturas
-
-### 5. Informes y Estadísticas
-
-- Ventas por período
-- Productos más vendidos
-- Estadísticas de métodos de pago
-- Informes de facturación
-
-## Tecnologías Utilizadas
-
-- PHP
-- MySQL
-- Bootstrap
-- JavaScript
-- HTML/CSS
-
-## Requisitos del Sistema
-
-- Servidor web Apache/Nginx
-- PHP 7.4 o superior
-- MySQL 5.7 o superior
-- Extensiones PHP:
-  - PDO
-  - MySQL
-  - mbstring
-  - json
+- `index.php`: punto de entrada principal.
+- `src/`: código fuente organizado en:
+  - `config/`: configuración de la base de datos y parámetros globales.
+  - `controllers/`: lógica de control y flujo de la aplicación.
+  - `models/`: modelos de datos (Producto, Ticket, Usuario, etc.).
+  - `repositories/`: acceso a datos y consultas SQL.
+  - `services/`: lógica de negocio y utilidades.
+  - `views/`: vistas y plantillas HTML.
+- `vendor/`: dependencias instaladas con Composer (incluye dompdf).
+- `aprendizaje.md` y `guion.md`: documentación y guion del proyecto.
 
 ## Instalación
 
-1. Clonar el repositorio:
+1. Clona el repositorio:
+   ```sh
+   git clone https://github.com/tuusuario/ticketscompra.git
+   ```
+2. Instala las dependencias con Composer:
+   ```sh
+   composer install
+   ```
+3. Importa la base de datos desde el archivo SQL proporcionado (por ejemplo, `ticketscompra (1).sql`).
+4. Configura la conexión a la base de datos en `src/config/Database.php`.
+5. Configura tu servidor web (Apache, Nginx, MAMP, XAMPP, etc.) para apuntar al directorio del proyecto.
 
-```bash
-git clone https://github.com/tuusuario/ticketscompra.git
-```
+## Uso básico
 
-2. Importar la base de datos:
+1. Accede a la aplicación desde tu navegador.
+2. Inicia sesión o regístrate como usuario.
+3. Gestiona productos, clientes y tickets desde el menú principal.
+4. Crea tickets de compra y genera facturas en PDF.
+5. Consulta informes y estadísticas desde la sección correspondiente.
 
-```bash
-mysql -u root -p < ticketscompra.sql
-```
+## Documentación
 
-3. Configurar la conexión a la base de datos en `src/config/Database.php`
+- `aprendizaje.md`: explicación técnica y didáctica del proyecto.
+- `guion.md`: guion para presentaciones o defensa del proyecto.
 
-4. Configurar el servidor web para apuntar al directorio del proyecto
+## Requisitos
 
-## Estructura del Proyecto
+- PHP 7.4 o superior
+- Servidor web compatible (Apache, Nginx, MAMP, XAMPP, etc.)
+- MySQL o MariaDB
+- Composer
 
-```
-├── index.php                 # Punto de entrada principal
-├── src/
-│   ├── config/              # Configuración de la aplicación
-│   ├── controllers/         # Controladores MVC
-│   ├── models/             # Modelos de datos
-│   ├── repositories/       # Capa de acceso a datos
-│   ├── services/          # Lógica de negocio
-│   └── views/             # Vistas y plantillas
-```
+## Autor
 
-## Uso
+[Tu nombre]
 
-### Gestión de Tickets
+---
 
-1. Acceder a "Nuevo Ticket"
-2. Seleccionar productos
-3. Agregar cliente (opcional)
-4. Seleccionar método de pago
-5. Finalizar e imprimir ticket
-
-### Facturación
-
-1. Acceder a "Lista de Tickets"
-2. Seleccionar ticket(s)
-3. Generar factura
-4. Imprimir o exportar a PDF
-
-## Integración con PMS Daniya Denia
-
-### Puntos de Integración Futuros
-
-1. **Sistema de Reservas**
-
-   - Cargos directos a habitación
-   - Facturación unificada
-   - Estado de cuenta del huésped
-
-2. **Gestión de Clientes**
-
-   - Sincronización automática de datos
-   - Historial unificado de gastos
-   - Sistema de fidelización
-
-3. **Informes Consolidados**
-
-   - Ingresos por departamento
-   - Estadísticas globales
-   - KPIs personalizados
-
-4. **APIs y Webhooks**
-   - Endpoints REST para integración
-   - Webhooks para eventos importantes
-   - Sincronización en tiempo real
-
-### Beneficios de la Integración
-
-- Gestión centralizada de clientes
-- Facturación unificada de servicios
-- Reportes consolidados
-- Mejor experiencia del cliente
-- Reducción de trabajo administrativo
-
-## Mantenimiento
-
-### Respaldos
-
-- Realizar copias de seguridad diarias de la base de datos
-- Mantener respaldos de configuraciones personalizadas
-- Documentar cambios y personalizaciones
-
-### Actualizaciones
-
-- Revisar actualizaciones de seguridad
-- Mantener las dependencias actualizadas
-- Seguir el registro de cambios para nuevas versiones
-
-## Licencia
-
-Propietaria - Todos los derechos reservados
+¡Ideal para aprender y practicar desarrollo web con PHP y gestión de ventas en comercios!
