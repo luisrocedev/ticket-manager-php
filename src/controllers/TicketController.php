@@ -220,7 +220,8 @@ class TicketController extends BaseCrudController
                 $ticket,
                 $data['metodoPago'],
                 $data['cliente_id'] ?? null,
-                $data['dniCliente'] ?? null
+                $data['dniCliente'] ?? null,
+                $data['buyerName'] ?? null
             );
             $impresion = $this->ticketService->generarImpresion($ticket);
             return $this->jsonResponse([

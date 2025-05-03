@@ -27,9 +27,11 @@ abstract class BaseCrudController
     {
         try {
             $items = $this->service->listarTodos();
+            $mapped = array_map([$this, 'prepareDataForResponse'], $items);
             return $this->jsonResponse([
                 'success' => true,
-                'data' => array_map([$this, 'prepareDataForResponse'], $items)
+                'data' => $mapped,
+                'total' => count($mapped)
             ]);
         } catch (Exception $e) {
             return $this->jsonResponse([

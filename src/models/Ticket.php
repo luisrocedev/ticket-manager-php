@@ -1,6 +1,7 @@
 <?php
 
-class Ticket {
+class Ticket
+{
     private $id;
     private $numeroTicket;
     private $fecha;
@@ -12,7 +13,8 @@ class Ticket {
     private $metodoPago;
     private $cliente;
 
-    public function __construct($empresa) {
+    public function __construct($empresa)
+    {
         $this->empresa = $empresa;
         $this->fecha = new DateTime();
         $this->items = [];
@@ -22,18 +24,21 @@ class Ticket {
         $this->generarNumeroTicket();
     }
 
-    private function generarNumeroTicket() {
+    private function generarNumeroTicket()
+    {
         // Formato: YYYYMMDD-XXXX donde XXXX es un número aleatorio
         $this->numeroTicket = date('Ymd') . '-' . str_pad(rand(1, 9999), 4, '0', STR_PAD_LEFT);
     }
 
-    public function agregarItem($producto, $cantidad) {
+    public function agregarItem($producto, $cantidad)
+    {
         $item = new TicketItem($producto, $cantidad);
         $this->items[] = $item;
         $this->recalcularTotales();
     }
 
-    private function recalcularTotales() {
+    private function recalcularTotales()
+    {
         $this->subtotal = 0;
         $this->ivaTotal = 0;
         $this->total = 0;
@@ -46,39 +51,78 @@ class Ticket {
     }
 
     // Getters
-    public function getId() { return $this->id; }
-    public function getNumeroTicket() { return $this->numeroTicket; }
-    public function getFecha() { return $this->fecha; }
-    public function getEmpresa() { return $this->empresa; }
-    public function getItems() { return $this->items; }
-    public function getSubtotal() { return $this->subtotal; }
-    public function getIvaTotal() { return $this->ivaTotal; }
-    public function getTotal() { return $this->total; }
-    public function getMetodoPago() { return $this->metodoPago; }
-    public function getCliente() { return $this->cliente; }
+    public function getId()
+    {
+        return $this->id;
+    }
+    public function getNumeroTicket()
+    {
+        return $this->numeroTicket;
+    }
+    public function getFecha()
+    {
+        return $this->fecha;
+    }
+    public function getEmpresa()
+    {
+        return $this->empresa;
+    }
+    public function getItems()
+    {
+        return $this->items;
+    }
+    public function getSubtotal()
+    {
+        return $this->subtotal;
+    }
+    public function getIvaTotal()
+    {
+        return $this->ivaTotal;
+    }
+    public function getTotal()
+    {
+        return $this->total;
+    }
+    public function getMetodoPago()
+    {
+        return $this->metodoPago;
+    }
+    public function getCliente()
+    {
+        return $this->cliente;
+    }
 
     // Setters
-    public function setMetodoPago($metodoPago) { $this->metodoPago = $metodoPago; }
-    public function setCliente($cliente) { $this->cliente = $cliente; }
+    public function setMetodoPago($metodoPago)
+    {
+        $this->metodoPago = $metodoPago;
+    }
+    public function setCliente($cliente)
+    {
+        $this->cliente = $cliente;
+    }
 
-    public function toArray() {
+    public function toArray()
+    {
         return [
             'id' => $this->id,
-            'numeroTicket' => $this->numeroTicket,
-            'fecha' => $this->fecha->format('Y-m-d H:i:s'),
+            'numero_ticket' => $this->numeroTicket,
+            // Fecha en formato ISO 8601
+            'fecha' => $this->fecha->format(DateTime::ATOM),
             'empresa' => $this->empresa->toArray(),
-            'items' => array_map(function($item) { 
-                return $item->toArray(); 
+            'items' => array_map(function ($item) {
+                return $item->toArray();
             }, $this->items),
             'subtotal' => $this->subtotal,
-            'ivaTotal' => $this->ivaTotal,
+            'iva_total' => $this->ivaTotal,
             'total' => $this->total,
-            'metodoPago' => $this->metodoPago,
+            'metodo_pago' => $this->metodoPago,
             'cliente' => $this->cliente ? $this->cliente->toArray() : null
         ];
     }
 
-    public function generarTicketImpresion() {
+    public function generarTicketImpresion()
+    {
         $ticket = "";
         $ticket .= str_repeat("=", 40) . "\n";
         $ticket .= str_pad($this->empresa->getNombre(), 40, " ", STR_PAD_BOTH) . "\n";
@@ -92,7 +136,8 @@ class Ticket {
         $ticket .= str_repeat("-", 40) . "\n";
 
         foreach ($this->items as $item) {
-            $ticket .= sprintf("%-20s %3d %7.2f %7.2f\n",
+            $ticket .= sprintf(
+                "%-20s %3d %7.2f %7.2f\n",
                 substr($item->getProducto()->getNombre(), 0, 20),
                 $item->getCantidad(),
                 $item->getProducto()->getPrecio(),
@@ -105,7 +150,7 @@ class Ticket {
         $ticket .= sprintf("%30s %7.2f\n", "IVA:", $this->ivaTotal);
         $ticket .= sprintf("%30s %7.2f\n", "Total:", $this->total);
         $ticket .= str_repeat("=", 40) . "\n";
-        
+
         if ($this->metodoPago) {
             $ticket .= "Método de pago: " . $this->metodoPago . "\n";
         }

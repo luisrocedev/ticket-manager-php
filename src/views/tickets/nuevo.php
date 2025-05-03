@@ -172,6 +172,21 @@ if (!isset($ticket)) {
     </div>
 </div>
 
+<!-- Modal de vista previa de ticket -->
+<div class="modal fade" id="ticketPreviewModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Vista Previa del Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="ticketPreviewContent" style="font-family: monospace;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Funciones JavaScript para la gestión del ticket
     let ticketItems = [];
@@ -325,10 +340,9 @@ if (!isset($ticket)) {
             })
             .then(data => {
                 if (data && data.success) {
-                    // Imprimir ticket
-                    imprimirTicket(data.impresion);
-                    // Redireccionar a la lista de tickets
-                    window.location.href = '/GitHub/ticketscompra/tickets/lista';
+                    // Mostrar vista previa del ticket
+                    document.getElementById('ticketPreviewContent').textContent = data.impresion;
+                    new bootstrap.Modal(document.getElementById('ticketPreviewModal')).show();
                 } else {
                     alert(data.error || 'Error al finalizar el ticket');
                 }
@@ -343,17 +357,6 @@ if (!isset($ticket)) {
         if (confirm('¿Está seguro de que desea cancelar este ticket?')) {
             window.location.href = '/GitHub/ticketscompra/tickets/lista';
         }
-    }
-
-    function imprimirTicket(contenido) {
-        const ventanaImpresion = window.open('', '_blank');
-        ventanaImpresion.document.write(`
-        <pre style="font-family: monospace;">
-            ${contenido}
-        </pre>
-    `);
-        ventanaImpresion.print();
-        ventanaImpresion.close();
     }
 
     // Inicialización
@@ -431,4 +434,12 @@ if (!isset($ticket)) {
             });
         }
     }
+
+    // Al cerrar la vista previa, redirigir a la lista de tickets
+    document.addEventListener('DOMContentLoaded', () => {
+        const previewModalEl = document.getElementById('ticketPreviewModal');
+        previewModalEl.addEventListener('hidden.bs.modal', () => {
+            window.location.href = '/GitHub/ticketscompra/tickets/lista';
+        });
+    });
 </script>

@@ -104,7 +104,8 @@
 
     async function verDetalles(id) {
         try {
-            const response = await fetch(`/GitHub/ticketscompra/api/tickets/${id}/detalle`);
+            const response = await fetch(`/GitHub/ticketscompra/index.php/api/tickets/${id}/detalle`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             const data = await response.json();
 
             if (data.success) {
@@ -128,12 +129,14 @@
                     <tbody>`;
 
                 ticket.items.forEach(item => {
+                    const precio = parseFloat(item.precio_unitario) || 0;
+                    const totalItem = parseFloat(item.total) || 0;
                     html += `
                     <tr>
                         <td>${item.producto.nombre}</td>
                         <td>${item.cantidad}</td>
-                        <td>${item.precio_unitario.toFixed(2)} €</td>
-                        <td>${item.total.toFixed(2)} €</td>
+                        <td>${precio.toFixed(2)} €</td>
+                        <td>${totalItem.toFixed(2)} €</td>
                     </tr>`;
                 });
 
@@ -142,15 +145,15 @@
                     <tfoot>
                         <tr>
                             <td colspan="3" class="text-end"><strong>Subtotal:</strong></td>
-                            <td>${ticket.subtotal.toFixed(2)} €</td>
+                            <td>${(parseFloat(ticket.subtotal) || 0).toFixed(2)} €</td>
                         </tr>
                         <tr>
                             <td colspan="3" class="text-end"><strong>IVA:</strong></td>
-                            <td>${ticket.iva_total.toFixed(2)} €</td>
+                            <td>${(parseFloat(ticket.iva_total) || 0).toFixed(2)} €</td>
                         </tr>
                         <tr>
                             <td colspan="3" class="text-end"><strong>Total:</strong></td>
-                            <td>${ticket.total.toFixed(2)} €</td>
+                            <td>${(parseFloat(ticket.total) || 0).toFixed(2)} €</td>
                         </tr>
                     </tfoot>
                 </table>`;
@@ -161,13 +164,14 @@
                 mostrarMensaje('Error: ' + data.error, 'error');
             }
         } catch (error) {
-            mostrarMensaje('Error al cargar los detalles del ticket', 'error');
+            console.error('Error en verDetalles:', error);
+            mostrarMensaje('Error al cargar los detalles del ticket: ' + error.message, 'error');
         }
     }
 
     async function reimprimirTicket(id) {
         try {
-            const response = await fetch(`/GitHub/ticketscompra/api/tickets/${id}/reimprimir`);
+            const response = await fetch(`/GitHub/ticketscompra/index.php/api/tickets/${id}/reimprimir`);
             const data = await response.json();
 
             if (data.success) {
@@ -184,7 +188,7 @@
 
     async function generarFactura(id) {
         try {
-            const response = await fetch(`/GitHub/ticketscompra/api/tickets/${id}/generar-factura`);
+            const response = await fetch(`/GitHub/ticketscompra/index.php/api/tickets/${id}/generar-factura`);
             const data = await response.json();
 
             if (data.success) {

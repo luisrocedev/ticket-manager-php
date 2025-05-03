@@ -81,26 +81,44 @@ class TicketService extends BaseService
         return $ticket;
     }
 
-    public function finalizarTicket($ticket, $metodoPago, $clienteId = null, $dniCliente = null)
+    public function finalizarTicket($ticket, $metodoPago, $clienteId = null, $dniCliente = null, $buyerName = null)
     {
-        // Asignar cliente por ID, o bien por DNI/CIF si se proporciona
+        // Asignar cliente existente o crear nuevo basado en DNI/CIF y nombre
         if ($clienteId) {
             $cliente = $this->clienteRepository->buscarPorId($clienteId);
-            if (!$cliente) {
-                throw new Exception("Cliente no encontrado");
+            if ($cliente) {
+                $ticket->setCliente($cliente);
             }
-            $ticket->setCliente($cliente);
         } elseif ($dniCliente) {
             $cliente = $this->clienteRepository->buscarPorDniCif($dniCliente);
-            if (!$cliente) {
-                throw new Exception("Cliente no encontrado");
+            if (!$cliente && $buyerName) {
+                // Crear un nuevo cliente temporal o en base de datos
+                $clienteService = new ClienteService();
+                $cliente = $clienteService->crear([
+                    'nombre' => $buyerName,
+                    'apellidos' => '',
+                    'dni_cif' => $dniCliente,
+                    'direccion' => null,
+                    'telefono' => null,
+                    'email' => null
+                ]);
             }
-            $ticket->setCliente($cliente);
+            if ($cliente) {
+                $ticket->setCliente($cliente);
+            }
         }
 
         $ticket->setMetodoPago($metodoPago);
+        // Guardar ticket en BD
         $this->repository->guardar($ticket);
-
+        // Descontar stock de cada producto vendido
+        $productoService = new ProductoService();
+        foreach ($ticket->getItems() as $item) {
+            $producto = $item->getProducto();
+            $cantidad = $item->getCantidad();
+            // restar cantidad vendida
+            $productoService->actualizarStock($producto->getId(), -$cantidad);
+        }
         return $ticket;
     }
 
