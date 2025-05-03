@@ -61,7 +61,6 @@ ticketscompra es una aplicación desarrollada en PHP que permite gestionar produ
 ## Documentación
 
 - `aprendizaje.md`: explicación técnica y didáctica del proyecto.
-- `guion.md`: guion para presentaciones o defensa del proyecto.
 
 ## Requisitos
 
@@ -72,8 +71,4 @@ ticketscompra es una aplicación desarrollada en PHP que permite gestionar produ
 
 ## Autor
 
-[Tu nombre]
-
----
-
-¡Ideal para aprender y practicar desarrollo web con PHP y gestión de ventas en comercios!
+Luis Rodriguez
