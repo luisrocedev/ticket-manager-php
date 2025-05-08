@@ -1,123 +1,139 @@
-# Guía para Publicaciones de LinkedIn – Proyecto "ticketscompra"
-
-Esta guía te ayudará a preparar y realizar publicaciones de LinkedIn sobre el proyecto ticketscompra, adaptadas a cada asignatura. Puedes copiar y completar los ejemplos durante el examen.
+# Guía de publicaciones LinkedIn para TicketsCompra (con ejemplos y marketing)
 
 ---
 
-## Lenguajes de Marcas
+## Lenguajes de Marcas y Sistemas de Gestión de Información
 
-🧾 **Presentando “ticketscompra” – Lenguajes de Marcas**
+**Publicación:**
 
-La interfaz de ticketscompra está desarrollada con HTML5 y CSS3, permitiendo una experiencia de usuario clara y profesional para la gestión de tickets de compra.
+🧾 TicketsCompra ofrece una interfaz clara y sencilla para la gestión de tickets y facturas, desarrollada en HTML5, CSS3 y JavaScript. La validación de formularios y la generación de informes PDF son parte esencial de la experiencia.
 
-Ejemplo de código:
+**Ejemplo de código (HTML para subir factura):**
 
-**<**form\*\* **id**=**"nuevo-ticket"**>\*\*
+```html
+<form id="formFactura" enctype="multipart/form-data">
+  <input
+    type="file"
+    id="facturaPDF"
+    name="facturaPDF"
+    accept="application/pdf"
+    required
+  />
+  <button type="submit">Subir Factura</button>
+</form>
+```
 
-** <**input\*\* **type**=**"text"** **name**=**"cliente"** **placeholder**=**"Nombre del cliente"** />\*\*
+#HTML #CSS #JavaScript #PDF
 
-** <**input\*\* **type**=**"number"** **name**=**"importe"** **placeholder**=**"Importe"** />\*\*
-
-** <**button\*\* **type**=**"submit"**>Crear ticket</**button**>\*\*
-
-**</**form**>**
-
-[Sube aquí una captura de la pantalla de creación de tickets]
-
----
-
-## Sistemas Informáticos
-
-🔒 **Seguridad y rendimiento en “ticketscompra” – Sistemas Informáticos**
-
-El backend utiliza PHP y buenas prácticas de seguridad, como la gestión de sesiones y la validación de entradas.
-
-Ejemplo de código:
-
-**<?php**
-
-**session_start**(**)**;
-
-**if** **(**isset**(**$_POST**[**'cliente'**]**)** **&&** **isset**(**$\_POST**[**'importe'**]**)**)** **{**
-
-\*\* \*\*// Validación y registro del ticket
-
-**}**
-
-[Incluye aquí un diagrama de arquitectura o consola mostrando logs]
-
----
-
-## Base de Datos
-
-📊 **Gestión de datos en “ticketscompra” – Base de Datos**
-
-ticketscompra gestiona los tickets, clientes y productos usando una base de datos SQL, permitiendo consultas y operaciones eficientes.
-
-Ejemplo de código:
-
-**<?php**
-
-**// Conexión y consulta**
-
-**$conn** **=** **new** **mysqli**(**$host**, **$user**, **$pass**, **$db**)**;**
-
-**$result** **=** **$conn**->**query**(**"**SELECT** \*\*\*** **FROM** tickets**"**)\*\*;
-
-[Adjunta aquí un fragmento de la base de datos o una consulta ejemplo]
-
----
-
-## Entornos de Desarrollo
-
-⚙️ **Desarrollo ágil y despliegue en “ticketscompra” – Entornos de Desarrollo**
-
-El proyecto utiliza scripts y herramientas para facilitar el desarrollo, backup y despliegue.
-
-Ejemplo de script:
-
-**# backup.sh**
-
-**mysqldump** **-u** **usuario** **-p** **base_de_datos** > **backup.sql**
-
-[Incluye una captura de la terminal ejecutando un script de backup o despliegue]
+**Imagen/vídeo sugerido:**  
+Captura del formulario de subida de facturas o de un informe generado.
 
 ---
 
 ## Programación
 
-💻 **Lógica y algoritmia en “ticketscompra” – Programación**
+**Publicación:**
 
-La lógica de negocio se desarrolla en PHP y JavaScript, gestionando operaciones como creación de tickets, listados y generación de informes.
+💡 El backend de TicketsCompra está desarrollado en PHP, aplicando el patrón MVC. Los controladores gestionan la lógica de negocio y la generación de informes, mientras que los modelos interactúan con la base de datos.
 
-Ejemplo de código:
+**Ejemplo de código (controlador de facturas):**
 
-**<?php**
+```php
+class FacturaController {
+    public function subirFactura($datos) {
+        // Validación y almacenamiento
+        // ...
+    }
+    public function generarInforme() {
+        // Generación de PDF
+        // ...
+    }
+}
+```
 
-**function** **crearTicket**(**$datos**)\*\* \*\*{
+#PHP #MVC #Backend
 
-\*\* **// Lógica para registrar un ticket en la base de **datos\*\*
+**Imagen/vídeo sugerido:**  
+Fragmento de código de un controlador o vista de informe.
 
-**}**
+---
 
-[Incluye aquí un diagrama de flujo o fragmento de la lógica de creación de tickets]
+## Base de Datos
+
+**Publicación:**
+
+🗄️ TicketsCompra utiliza MySQL para almacenar clientes, empresas y facturas. El diseño de la base de datos permite búsquedas rápidas y generación de informes detallados.
+
+**Ejemplo de código (consulta SQL):**
+
+```sql
+SELECT * FROM facturas WHERE fecha >= '2025-01-01';
+```
+
+#MySQL #Database
+
+**Imagen/vídeo sugerido:**  
+Diagrama de tablas o consulta en phpMyAdmin.
+
+---
+
+## Sistemas Informáticos
+
+**Publicación:**
+
+🖥️ TicketsCompra puede desplegarse en cualquier servidor compatible con PHP y MySQL. Incluye scripts para copias de seguridad y restauración de la base de datos.
+
+**Ejemplo de código (script de backup en bash):**
+
+```bash
+mysqldump -u usuario -p'contraseña' ticketscompra > backup.sql
+```
+
+#SysAdmin #Backup
+
+**Imagen/vídeo sugerido:**  
+Captura de consola ejecutando el backup o panel de administración.
+
+---
+
+## Entornos de Desarrollo
+
+**Publicación:**
+
+⚙️ El desarrollo de TicketsCompra se gestiona con VS Code y GitHub, usando Composer para la gestión de dependencias y DomPDF para la generación de informes.
+
+**Ejemplo de código (extracto de composer.json):**
+
+```json
+{
+  "require": {
+    "dompdf/dompdf": "^2.0"
+  }
+}
+```
+
+#VSCode #GitHub #Composer
+
+**Imagen/vídeo sugerido:**  
+Captura de VS Code con composer.json abierto o panel de dependencias.
 
 ---
 
 ## Proyecto Intermodular
 
-🤝 **Integración total: “ticketscompra” – Proyecto Intermodular**
+**Publicación:**
 
-ticketscompra es el resultado de la integración de conocimientos de todas las asignaturas, desde la interfaz hasta la gestión de datos y lógica de negocio.
+🌟 TicketsCompra es un proyecto intermodular que digitaliza la gestión de tickets y facturas, permitiendo la generación de informes y el almacenamiento seguro de documentos.
 
-Ejemplo de función:
+**Ejemplo de flujo de trabajo:**
 
-**<?php**
+```plaintext
+Subida de factura → Almacenamiento → Generación de informe → Backup
+```
 
-**function** **generarInforme**(**$fechaInicio**, **$fechaFin**)\*\* \*\*{
+#FullStack #GestiónDocumental
 
-\*\* **// Lógica para generar un informe de tickets en un **rango de fechas\*\*
+**Imagen/vídeo sugerido:**  
+Vídeo mostrando el proceso de subida y generación de informe.
 
-**}**
-
-[Sube un gif o imagen del sistema funcionando en tiempo real]
+---
