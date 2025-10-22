@@ -1,4 +1,4 @@
-# ticketscompra
+# ticket-manager-php
 
 Sistema de gestión y generación de tickets de compra
 
